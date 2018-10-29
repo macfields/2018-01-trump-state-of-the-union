@@ -1,0 +1,41 @@
+---
+title: "stateoftheunion"
+author: "Maclaine Fields"
+date: "10/29/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(tidytext)
+library(lubridate)
+```
+
+
+```{r process, results="hide", warning=FALSE, message=FALSE}
+# load data
+sou <- read_csv("data/sou.csv")
+presidents <- read_csv("data/presidents.csv")
+
+sou <- sou %>%
+  left_join(presidents)
+```
+
+
+```{r}
+
+sourating <- sou %>%
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(president, date, party) %>% 
+  summarize(rating = mean(score)) %>% 
+  arrange(desc(rating))
+  
+sourating %>% 
+ggplot(aes(x=date, y= rating, col = party)) + geom_line()
+
+
+```
+
